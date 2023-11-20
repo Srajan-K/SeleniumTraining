@@ -1,3 +1,5 @@
+import com.assertthat.selenium_shutterbug.core.Capture;
+import com.assertthat.selenium_shutterbug.core.Shutterbug;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
@@ -45,7 +47,7 @@ public class Test19 {
         List<WebElement> listChocolate = driver.findElements(By.xpath("//div[@class='search_AddCart1 ']"));
         js.executeScript("arguments[0].click();", listChocolate.get(0));
         js.executeScript("arguments[0].click();", listChocolate.get(1));
-        driver.findElement(By.xpath("//a[contains(text(),'Lindt Lindor Assorted 200G')]")).click();
+        driver.findElement(By.xpath("//a[contains(text(),'Lindt Gold Bar Hazelnut 300G')]")).click();
         WebElement head=driver.findElement(By.xpath("(//h1[@class='pd_Title'])[1]"));
         String heading=head.getText();
         System.out.println(heading);
@@ -58,10 +60,12 @@ public class Test19 {
         WebElement emailField=driver.findElement(By.xpath("//input[@name='ctl00$txtNewletter']"));
         emailField.sendKeys("Dummy@gmail.com");
         actions.keyDown(emailField,Keys.CONTROL).sendKeys("a").keyDown(Keys.BACK_SPACE).sendKeys("v").build().perform();
-        TakesScreenshot screenshot= (TakesScreenshot) driver;
-        File screenshots=screenshot.getScreenshotAs(OutputType.FILE);
+       // TakesScreenshot screenshot= (TakesScreenshot) driver;
         String timeStamp=new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        FileUtils.copyFile(screenshots,new File("./Screenshot/"+heading+""+timeStamp+".png"));
+        Shutterbug.shootPage(driver, Capture.FULL,true).withName(heading+""+timeStamp).save("./Screenshot");
+//        File screenshots=screenshot.getScreenshotAs(OutputType.FILE);
+
+//        FileUtils.copyFile(screenshots,new File("./Screenshot/"+heading+""+timeStamp+".png"));
         driver.quit();
     }
 }
