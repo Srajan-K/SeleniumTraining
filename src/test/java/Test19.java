@@ -1,5 +1,9 @@
-import com.assertthat.selenium_shutterbug.core.Capture;
-import com.assertthat.selenium_shutterbug.core.Shutterbug;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfWriter;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -8,7 +12,12 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.Screenshot;
+import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -58,10 +67,47 @@ public class Test19 {
         WebElement emailField=driver.findElement(By.xpath("//input[@name='ctl00$txtNewletter']"));
         emailField.sendKeys("Dummy@gmail.com");
         actions.keyDown(emailField,Keys.CONTROL).sendKeys("a").keyDown(Keys.BACK_SPACE).sendKeys("v").build().perform();
-       // TakesScreenshot screenshot= (TakesScreenshot) driver;
+        Screenshot screenshot = new AShot()
+                .shootingStrategy(ShootingStrategies.viewportPasting(1000))
+                .takeScreenshot(driver);
+
+        // Resize the image to fit a standard page size
+        int maxWidth = (int) PageSize.A4.getWidth();
+        int maxHeight = (int) PageSize.A4.getHeight();
+//        screenshot = new AShot()
+//                .shootingStrategy(ShootingStrategies.viewportPasting(1000))
+//                .takeScreenshot(driver, screenshot.getViewportSize());
+//        screenshot = new AShot()
+//                .shootingStrategy(ShootingStrategies.viewportPasting(1000))
+//                .takeScreenshot(driver, screenshot.getViewportSize());
+//        screenshot = new AShot()
+//                .shootingStrategy(ShootingStrategies.viewportPasting(1000))
+//                .takeScreenshot(driver, screenshot.getViewportSize())
+//                .scaleTo(maxWidth, maxHeight);
         String timeStamp=new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        Shutterbug.shootPage(driver, Capture.FULL,true).withName(heading+""+timeStamp).save("./Screenshot");
-//        File screenshots=screenshot.getScreenshotAs(OutputType.FILE);
+        //Shutterbug.shootPage(driver, Capture.FULL,true).withName(heading+""+timeStamp).save("./Screenshot");
+        File screenshotFile = new File("./Screenshot/"+heading+""+timeStamp+".pdf");
+        try {
+            // Convert the screenshot to an iText Image
+            Image image = Image.getInstance(screenshot.getImage(), null);
+
+            // Create a new Document with the size of the captured screenshot
+            Document document = new Document(image);
+
+            // Create a PdfWriter and add the image to the PDF
+            PdfWriter.getInstance(document, new FileOutputStream(screenshotFile));
+            document.open();
+            document.add(image);
+            document.close();
+
+            System.out.println("Full-page screenshot saved as PDF successfully");
+
+            System.out.println("Screenshot saved as PDF successfully");
+        } catch (IOException | DocumentException e) {
+            System.err.println("Error saving screenshot as PDF: " + e.getMessage());
+            e.printStackTrace();
+        }
+
 
 //        FileUtils.copyFile(screenshots,new File("./Screenshot/"+heading+""+timeStamp+".png"));
         driver.quit();
